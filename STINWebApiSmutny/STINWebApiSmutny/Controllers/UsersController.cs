@@ -41,6 +41,19 @@ namespace STINWebApiSmutny.Controllers
             return user;
         }
 
+        [HttpGet("Login")]
+        public async Task<ActionResult<User>> LoginUser([FromQuery]UserLoginModel userLoginModel)
+        {
+            var user = await _context.Users.Where(x => x.email == userLoginModel.email && x.password == userLoginModel.password).FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return user;
+        }
+
         // PUT: api/Users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
@@ -72,6 +85,36 @@ namespace STINWebApiSmutny.Controllers
             return NoContent();
         }
 
+        [HttpPut("Pay/{id}")]
+        public async Task<IActionResult> PayUser(int id)
+        {
+            User user = await _context.Users.Where(x => x.id == id).FirstOrDefaultAsync();
+            if (user == null)
+            {
+                return BadRequest();
+            }
+            user.pass = "true";
+            _context.Entry(user).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!UserExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -81,6 +124,18 @@ namespace STINWebApiSmutny.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetUser", new { id = user.id }, user);
+        }
+
+
+        [HttpPost("Register")]
+        public async Task<ActionResult<User>> RegisterUser(UserRegisterModel userInputModel)
+        {
+            if (_context.Users.Where(x => x.email == userInputModel.email).Any()) { return BadRequest(); }
+
+            _context.Users.Add(new User { username = userInputModel.username, email = userInputModel.email, password = userInputModel.password, pass = "none" });
+            await _context.SaveChangesAsync();
+
+            return Created();
         }
 
         // DELETE: api/Users/5

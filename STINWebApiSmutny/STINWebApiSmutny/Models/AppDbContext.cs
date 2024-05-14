@@ -11,5 +11,6 @@ namespace STINWebApiSmutny.Models
         }
 
         public DbSet<User> Users { get; set; } = null!;
+        public DbSet<Favorit> Favorites { get; set; } = null!;
     }
 }
