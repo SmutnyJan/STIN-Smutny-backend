@@ -1,33 +1,138 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using STINWebApiSmutny.Models;
+using System.Text.Json;
 
 namespace STINWebApiSmutny.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
+        private readonly AppDbContext _context;
+        private string apiKey = "5ce0370e0fbf737fe37f5550bb8c58d6";
 
-        private readonly ILogger<WeatherForecastController> _logger;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+
+        public WeatherForecastController(AppDbContext context)
         {
-            _logger = logger;
+            _context = context;
         }
 
-        [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        [HttpGet("Weather/{city}")]
+        public async Task<ActionResult<CurrentWeather>> GetWeather(string city)
         {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            List<Location>? locations;
+            try
             {
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+                locations = await GetLocation(city);
+                if (locations.Count == 0)
+                {
+                    return BadRequest("No such place!");
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                return BadRequest(e);
+            }
+
+
+            string weatherUrl = $"https://api.openweathermap.org/data/2.5/weather?lat={locations[0].lat.ToString(System.Globalization.CultureInfo.InvariantCulture)}&lon={locations[0].lon.ToString(System.Globalization.CultureInfo.InvariantCulture)}&appid={apiKey}&lang=cz&units=metric";
+
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    HttpResponseMessage response = await client.GetAsync(weatherUrl);
+                    response.EnsureSuccessStatusCode();
+
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    CurrentWeather currentWeather = JsonSerializer.Deserialize<CurrentWeather>(responseBody);
+
+                    return currentWeather;
+                }
+                catch (HttpRequestException e)
+                {
+                    return BadRequest(e);
+                }
+            }
+
+        }
+
+        [HttpGet("WeatherLastWeek/{city}")]
+        public async Task<ActionResult<List<HistoryWeather>>> GetWeatherLastWeek(string city)
+        {
+            List<Location>? locations;
+            try
+            {
+                locations = await GetLocation(city);
+                if (locations.Count == 0)
+                {
+                    return BadRequest("No such place!");
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                return BadRequest(e);
+            }
+
+            List<HistoryWeather> weather = new List<HistoryWeather>();
+            for (var i = 1; i < 7; i++)
+            {
+                DateTime dateTime = DateTime.Now.AddDays(-i);
+
+                var unixTime = ((DateTimeOffset)dateTime).ToUnixTimeSeconds();
+
+                string weatherUrl = $"https://history.openweathermap.org/data/2.5/history/city?lat={locations[0].lat.ToString(System.Globalization.CultureInfo.InvariantCulture)}&lon={locations[0].lat.ToString(System.Globalization.CultureInfo.InvariantCulture)}&type=day&start={unixTime}&cnt=1&appid={apiKey}&lang=cz&units=metric";
+
+                using (HttpClient client = new HttpClient())
+                {
+                    try
+                    {
+                        HttpResponseMessage response = await client.GetAsync(weatherUrl);
+                        response.EnsureSuccessStatusCode();
+
+                        string responseBody = await response.Content.ReadAsStringAsync();
+                        HistoryWeather currentWeather = JsonSerializer.Deserialize<HistoryWeather>(responseBody);
+                        currentWeather.DateTime = dateTime;
+
+                        weather.Add(currentWeather);
+                    }
+                    catch (HttpRequestException e)
+                    {
+                        return BadRequest(e);
+                    }
+                }
+            }
+
+            return weather;
+
+        }
+
+
+        private async Task<List<Location>?> GetLocation(string city)
+        {
+            string locationUrl = $"http://api.openweathermap.org/geo/1.0/direct?q={city}&limit=1&appid={apiKey}";
+
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    HttpResponseMessage response = await client.GetAsync(locationUrl);
+                    response.EnsureSuccessStatusCode();
+
+                    string responseBody = await response.Content.ReadAsStringAsync();
+
+                    List<Location>? location = JsonSerializer.Deserialize<List<Location>>(responseBody);
+                    return location;
+                }
+                catch (HttpRequestException e)
+                {
+                    throw new HttpRequestException();
+                }
+            }
+
+
         }
     }
 }
