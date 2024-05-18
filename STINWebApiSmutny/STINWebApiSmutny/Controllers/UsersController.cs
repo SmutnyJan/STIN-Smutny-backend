@@ -130,7 +130,7 @@ namespace STINWebApiSmutny.Controllers
         [HttpPost("Register")]
         public async Task<ActionResult<User>> RegisterUser(UserRegisterModel userInputModel)
         {
-            if (_context.Users.Where(x => x.email == userInputModel.email).Any()) { return BadRequest(); }
+            if (_context.Users.Where(x => x.email == userInputModel.email).Any()) { return BadRequest("Email already taken!"); }
 
             _context.Users.Add(new User { username = userInputModel.username, email = userInputModel.email, password = userInputModel.password, pass = "none" });
             await _context.SaveChangesAsync();

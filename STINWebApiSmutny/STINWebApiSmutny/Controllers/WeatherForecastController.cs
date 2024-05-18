@@ -1,33 +1,47 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using STINWebApiSmutny.Models;
+using System.Text.Json;
 
 namespace STINWebApiSmutny.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
+        private readonly AppDbContext _context;
 
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(AppDbContext context)
         {
-            _logger = logger;
+            _context = context;
         }
 
-        [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        [HttpGet("Weather/{city}")]
+        public async Task<ActionResult<string>> GetWeather(string city)
         {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            string apiKey = "5ce0370e0fbf737fe37f5550bb8c58d6";
+            string locationUrl = $"http://api.openweathermap.org/geo/1.0/direct?q={city}&limit=1&appid={apiKey}";
+
+            using (HttpClient client = new HttpClient())
             {
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+                try
+                {
+                    HttpResponseMessage response = await client.GetAsync(locationUrl);
+                    response.EnsureSuccessStatusCode();
+
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    if(responseBody == "[]")
+                    {
+                        return BadRequest("No such place.");
+                    }
+                    List<Location>? location = JsonSerializer.Deserialize<List<Location>>(responseBody);
+                    return responseBody;
+                }
+                catch (HttpRequestException e)
+                {
+                    return BadRequest(e);
+                }
+            }
         }
     }
 }
