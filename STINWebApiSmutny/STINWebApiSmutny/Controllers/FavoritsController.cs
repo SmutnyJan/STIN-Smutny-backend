@@ -41,6 +41,16 @@ namespace STINWebApiSmutny.Controllers
             return favorit;
         }
 
+        // GET: api/Favorits/User/5
+        [HttpGet("User/{user_id}")]
+        public async Task<ActionResult<List<Favorit>>> GetUserFavorites(int user_id)
+        {
+            var favorites = await _context.Favorites.Where(x => x.Users_id == user_id).ToListAsync();
+
+
+            return favorites;
+        }
+
         // PUT: api/Favorits/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
