@@ -37,7 +37,7 @@ namespace STINWebApiSmutny.Controllers
             }
 
 
-            string weatherUrl = $"https://api.openweathermap.org/data/2.5/weather?lat={locations[0].lat.ToString(System.Globalization.CultureInfo.InvariantCulture)}&lon={locations[0].lon.ToString(System.Globalization.CultureInfo.InvariantCulture)}&appid={apiKey}&lang=cz&units=metric";
+            string weatherUrl = $"https://api.openweathermap.org/data/2.5/weather?lat={locations[0].lat.ToString(System.Globalization.CultureInfo.InvariantCulture)}&lon={locations[0].lon.ToString(System.Globalization.CultureInfo.InvariantCulture)}&appid={apiKey}&units=metric";
 
             using (HttpClient client = new HttpClient())
             {
@@ -83,7 +83,7 @@ namespace STINWebApiSmutny.Controllers
 
                 var unixTime = ((DateTimeOffset)dateTime).ToUnixTimeSeconds();
 
-                string weatherUrl = $"https://history.openweathermap.org/data/2.5/history/city?lat={locations[0].lat.ToString(System.Globalization.CultureInfo.InvariantCulture)}&lon={locations[0].lat.ToString(System.Globalization.CultureInfo.InvariantCulture)}&type=day&start={unixTime}&cnt=1&appid={apiKey}&lang=cz&units=metric";
+                string weatherUrl = $"https://history.openweathermap.org/data/2.5/history/city?lat={locations[0].lat.ToString(System.Globalization.CultureInfo.InvariantCulture)}&lon={locations[0].lat.ToString(System.Globalization.CultureInfo.InvariantCulture)}&type=day&start={unixTime}&cnt=1&appid={apiKey} &units=metric";
 
                 using (HttpClient client = new HttpClient())
                 {
