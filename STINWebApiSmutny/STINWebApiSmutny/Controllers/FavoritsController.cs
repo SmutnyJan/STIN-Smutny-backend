@@ -41,6 +41,30 @@ namespace STINWebApiSmutny.Controllers
             return favorit;
         }
 
+        // GET: api/Favorits/5/London
+        [HttpGet("{user_id}/{location}")]
+        public async Task<ActionResult<bool>> GetFavorit(int user_id, string location)
+        {
+            var favorit = await _context.Favorites.Where(x => x.Users_id == user_id && x.city == location).FirstOrDefaultAsync();
+
+            if (favorit == null)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        // GET: api/Favorits/User/5
+        [HttpGet("Favorits/{user_id}")]
+        public async Task<ActionResult<List<Favorit>>> GetUserFavorites(int user_id)
+        {
+            var favorites = await _context.Favorites.Where(x => x.Users_id == user_id).ToListAsync();
+
+
+            return favorites;
+        }
+
         // PUT: api/Favorits/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
