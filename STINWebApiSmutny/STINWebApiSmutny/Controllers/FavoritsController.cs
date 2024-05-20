@@ -101,6 +101,10 @@ namespace STINWebApiSmutny.Controllers
         [HttpPost]
         public async Task<ActionResult<Favorit>> PostFavorit(Favorit favorit)
         {
+            if(_context.Favorites.Where(x => x.Users_id == favorit.Users_id && x.city == favorit.city).Any())
+            {
+                return BadRequest("Already added in favourites!");
+            }
             _context.Favorites.Add(favorit);
             await _context.SaveChangesAsync();
 
@@ -108,16 +112,16 @@ namespace STINWebApiSmutny.Controllers
         }
 
         // DELETE: api/Favorits/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteFavorit(int id)
+        [HttpDelete]
+        public async Task<IActionResult> DeleteFavorit(Favorit favorit)
         {
-            var favorit = await _context.Favorites.FindAsync(id);
-            if (favorit == null)
+            var favorit_to_delete = await _context.Favorites.Where(x => x.Users_id == favorit.Users_id && x.city == favorit.city).FirstAsync();
+            if (favorit_to_delete == null)
             {
                 return NotFound();
             }
 
-            _context.Favorites.Remove(favorit);
+            _context.Favorites.Remove(favorit_to_delete);
             await _context.SaveChangesAsync();
 
             return NoContent();
