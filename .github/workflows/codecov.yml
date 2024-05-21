@@ -42,4 +42,4 @@ jobs:
         files: STINWebApiSmutny/STIN_Tests/TestResults/**/coverage.cobertura.xml
         flags: unittests
         name: codecov-umbrella
-        fail_ci_if_error: truename: .NET Core
+        fail_ci_if_error: true
