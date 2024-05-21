@@ -56,7 +56,7 @@ namespace STINWebApiSmutny.Controllers
         }
 
         // GET: api/Favorits/User/5
-        [HttpGet("Favorits/{user_id}")]
+        [HttpGet("/{user_id}")]
         public async Task<ActionResult<List<Favorit>>> GetUserFavorites(int user_id)
         {
             var favorites = await _context.Favorites.Where(x => x.Users_id == user_id).ToListAsync();
