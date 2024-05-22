@@ -10,7 +10,7 @@ namespace STINWebApiSmutny.Controllers
     public class WeatherForecastController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private string apiKey = "5ce0370e0fbf737fe37f5550bb8c58d6";
+        private string apiKey = "562a4e9efbf8cb651983751fe24986b1";
 
 
 
@@ -83,7 +83,7 @@ namespace STINWebApiSmutny.Controllers
 
                 var unixTime = ((DateTimeOffset)dateTime).ToUnixTimeSeconds();
 
-                string weatherUrl = $"https://history.openweathermap.org/data/2.5/history/city?lat={locations[0].lat.ToString(System.Globalization.CultureInfo.InvariantCulture)}&lon={locations[0].lat.ToString(System.Globalization.CultureInfo.InvariantCulture)}&type=day&start={unixTime}&cnt=1&appid={apiKey} &units=metric";
+                string weatherUrl = $"https://history.openweathermap.org/data/2.5/history/city?lat={locations[0].lat.ToString(System.Globalization.CultureInfo.InvariantCulture)}&lon={locations[0].lat.ToString(System.Globalization.CultureInfo.InvariantCulture)}&type=day&start={unixTime}&cnt=1&appid={apiKey}&units=metric";
 
                 using (HttpClient client = new HttpClient())
                 {
