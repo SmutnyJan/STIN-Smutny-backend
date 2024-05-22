@@ -115,6 +115,7 @@ namespace STINWebApiSmutny.Controllers
         [HttpDelete("{user_id}/{location}")]
         public async Task<IActionResult> DeleteFavorit(int user_id, string location)
         {
+
             var favorit_to_delete = await _context.Favorites.Where(x => x.Users_id == user_id && x.city == location).FirstAsync();
             if (favorit_to_delete == null)
             {
