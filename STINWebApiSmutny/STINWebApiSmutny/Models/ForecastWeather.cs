@@ -6,7 +6,7 @@
     {
         public int id { get; set; }
         public string name { get; set; }
-        public Coord coord { get; set; }
+        public CoordForecast coord { get; set; }
         public string country { get; set; }
         public int population { get; set; }
         public int timezone { get; set; }
@@ -35,12 +35,12 @@
         public FeelsLike feels_like { get; set; }
         public int pressure { get; set; }
         public int humidity { get; set; }
-        public List<Weather> weather { get; set; }
+        public List<WeatherForecast> weather { get; set; }
         public double speed { get; set; }
         public int deg { get; set; }
         public double gust { get; set; }
         public int clouds { get; set; }
-        public int pop { get; set; }
+        public double pop { get; set; }
         public double rain { get; set; }
     }
 
