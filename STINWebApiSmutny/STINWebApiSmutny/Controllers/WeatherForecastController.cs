@@ -115,6 +115,10 @@ namespace STINWebApiSmutny.Controllers
                     try
                     {
                         HttpResponseMessage response = await client.GetAsync(weatherUrl);
+                        if(!response.IsSuccessStatusCode)
+                        {
+                            return NotFound();
+                        }
                         response.EnsureSuccessStatusCode();
 
                         string responseBody = await response.Content.ReadAsStringAsync();
@@ -127,6 +131,7 @@ namespace STINWebApiSmutny.Controllers
                     {
                         return BadRequest(e);
                     }
+
                 }
             }
 
