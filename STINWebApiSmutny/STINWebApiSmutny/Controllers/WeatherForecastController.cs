@@ -20,7 +20,7 @@ namespace STINWebApiSmutny.Controllers
         }
 
         [HttpGet("Weather/{city}")]
-        public async Task<ActionResult<CurrentWeather>> GetWeather(string city)
+        public async Task<ActionResult<WeatherPackage>> GetWeather(string city)
         {
             List<Location>? locations;
             try
@@ -36,9 +36,30 @@ namespace STINWebApiSmutny.Controllers
                 return BadRequest(e);
             }
 
+            string forecastUrl = $"https://api.openweathermap.org/data/2.5/forecast/daily?lat={locations[0].lat.ToString(System.Globalization.CultureInfo.InvariantCulture)}&lon={locations[0].lon.ToString(System.Globalization.CultureInfo.InvariantCulture)}&cnt=1&appid={apiKey}&units=metric";
+
+            ForecastWeather forecastWeather;
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    HttpResponseMessage response = await client.GetAsync(forecastUrl);
+                    response.EnsureSuccessStatusCode();
+
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    forecastWeather = JsonSerializer.Deserialize<ForecastWeather>(responseBody);
+
+                }
+                catch (HttpRequestException e)
+                {
+                    return BadRequest(e);
+                }
+            }
+
 
             string weatherUrl = $"https://api.openweathermap.org/data/2.5/weather?lat={locations[0].lat.ToString(System.Globalization.CultureInfo.InvariantCulture)}&lon={locations[0].lon.ToString(System.Globalization.CultureInfo.InvariantCulture)}&appid={apiKey}&units=metric";
 
+            CurrentWeather currentWeather;
             using (HttpClient client = new HttpClient())
             {
                 try
@@ -47,15 +68,17 @@ namespace STINWebApiSmutny.Controllers
                     response.EnsureSuccessStatusCode();
 
                     string responseBody = await response.Content.ReadAsStringAsync();
-                    CurrentWeather currentWeather = JsonSerializer.Deserialize<CurrentWeather>(responseBody);
+                    currentWeather = JsonSerializer.Deserialize<CurrentWeather>(responseBody);
 
-                    return currentWeather;
+                   // return currentWeather;
                 }
                 catch (HttpRequestException e)
                 {
                     return BadRequest(e);
                 }
             }
+
+            return new WeatherPackage() { CurrentWeather = currentWeather, ForecastWeather = forecastWeather };
 
         }
 
