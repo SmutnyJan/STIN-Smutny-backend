@@ -175,6 +175,7 @@ namespace STIN_Tests.ControllersTest
             // Act
             var result = await controller.GetWeatherLastWeek("Prague");
 
+
             // Assert
             result.Value.Should().BeAssignableTo<List<HistoryWeather>>();
             var historyWeatherList = result.Value;
