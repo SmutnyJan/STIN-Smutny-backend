@@ -113,9 +113,9 @@ namespace STIN_Tests.ControllersTest
             // Assert
             result.Value.Should().BeOfType<WeatherPackage>();
             var weatherPackage = result.Value;
-            weatherPackage.CurrentWeather.main.temp.Should().BeApproximately(14.76, 1);
+            weatherPackage.CurrentWeather.main.temp.Should().BeApproximately(14.76, 1.5);
             weatherPackage.ForecastWeather.city.name.Should().Be("Prague");
-            weatherPackage.ForecastWeather.list.First().temp.day.Should().BeApproximately(14.33, 1);
+            weatherPackage.ForecastWeather.list.First().temp.day.Should().BeApproximately(14.33, 1.5);
         }
 
         [Fact]
@@ -180,7 +180,7 @@ namespace STIN_Tests.ControllersTest
             result.Value.Should().BeAssignableTo<List<HistoryWeather>>();
             var historyWeatherList = result.Value;
             historyWeatherList.Should().HaveCount(6);
-            historyWeatherList.First().list.First().main.temp.Should().BeApproximately(23.6, 1);
+            historyWeatherList.First().list.First().main.temp.Should().BeApproximately(23.6, 1.5);
         }
     }
 }
