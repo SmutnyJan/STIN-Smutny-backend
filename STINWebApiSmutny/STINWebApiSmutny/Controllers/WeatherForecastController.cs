@@ -79,9 +79,11 @@ namespace STINWebApiSmutny.Controllers
             List<HistoryWeather> weather = new List<HistoryWeather>();
             for (var i = 1; i < 7; i++)
             {
-                DateTime dateTime = DateTime.Now.AddDays(-i);
+                DateTime today = DateTime.Today;
 
-                var unixTime = ((DateTimeOffset)dateTime).ToUnixTimeSeconds();
+                DateTime noonToday = today.AddHours(15).AddDays(-i);
+
+                var unixTime = ((DateTimeOffset)noonToday).ToUnixTimeSeconds();
 
                 string weatherUrl = $"https://history.openweathermap.org/data/2.5/history/city?lat={locations[0].lat.ToString(System.Globalization.CultureInfo.InvariantCulture)}&lon={locations[0].lat.ToString(System.Globalization.CultureInfo.InvariantCulture)}&type=day&start={unixTime}&cnt=1&appid={apiKey}&units=metric";
 
@@ -94,7 +96,7 @@ namespace STINWebApiSmutny.Controllers
 
                         string responseBody = await response.Content.ReadAsStringAsync();
                         HistoryWeather currentWeather = JsonSerializer.Deserialize<HistoryWeather>(responseBody);
-                        currentWeather.DateTime = dateTime;
+                        currentWeather.DateTime = noonToday;
 
                         weather.Add(currentWeather);
                     }
