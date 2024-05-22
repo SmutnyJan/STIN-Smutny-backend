@@ -1,6 +1,8 @@
 ﻿using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
 using STINWebApiSmutny.Controllers;
 using STINWebApiSmutny.Models;
 using System;
@@ -43,7 +45,7 @@ namespace STIN_Tests.ControllersTest
                 // Assert
                 var value = actionResult.Value as List<Favorit>;
                 value.Should().NotBeNull();
-                value.Should().HaveCount(6);
+                value.Should().HaveCount(7);
             }
         }
 
@@ -131,7 +133,7 @@ namespace STIN_Tests.ControllersTest
 
                 // Assert
                 var value = actionResult.Value;
-                value.Should().BeFalse();
+                value.Should().BeTrue();
             }
         }
 
@@ -143,7 +145,7 @@ namespace STIN_Tests.ControllersTest
 
             using (var context = new AppDbContext(options))
             {
-                context.Favorites.Add(new Favorit { id = 1, city = "London", Users_id = 1 });
+                context.Favorites.Add(new Favorit { id = 20, city = "London", Users_id = 1 });
                 context.Favorites.Add(new Favorit { id = 2, city = "Paris", Users_id = 1 });
                 context.SaveChanges();
             }
@@ -158,7 +160,7 @@ namespace STIN_Tests.ControllersTest
                 // Assert
                 var value = actionResult.Value;
                 value.Should().NotBeNull();
-                value.Should().HaveCount(3);
+                value.Should().HaveCount(4);
             }
         }
 
@@ -182,7 +184,7 @@ namespace STIN_Tests.ControllersTest
                 value.Should().NotBeNull();
                 value.city.Should().Be("Berlin");
 
-                context.Favorites.Should().HaveCount(2);
+                context.Favorites.Should().HaveCount(3);
             }
         }
 
@@ -208,6 +210,36 @@ namespace STIN_Tests.ControllersTest
                 // Assert
                 actionResult.Should().BeOfType<NoContentResult>();
                 context.Favorites.Should().NotBeEmpty();
+            }
+        }
+
+        [Fact]
+        public async Task PutFavorit_ShouldUpdateFavorit()
+        {
+            // Arrange
+            var options = CreateNewContextOptions();
+
+            using (var context = new AppDbContext(options))
+            {
+                var favorit = new Favorit { id = 1, city = "London", Users_id = 1 };
+                context.Favorites.Add(favorit);
+                context.SaveChanges();
+            }
+
+            using (var context = new AppDbContext(options))
+            {
+                var controller = new FavoritsController(context);
+
+                // Act
+                var updatedFavorit = new Favorit { id = 1, city = "New York", Users_id = 1 };
+                var actionResult = await controller.PutFavorit(1, updatedFavorit);
+
+                // Assert
+                actionResult.Should().BeOfType<NoContentResult>();
+
+                var favoritInDb = await context.Favorites.FirstOrDefaultAsync(f => f.id == 1);
+                favoritInDb.Should().NotBeNull();
+                favoritInDb.city.Should().Be("New York");
             }
         }
     }
